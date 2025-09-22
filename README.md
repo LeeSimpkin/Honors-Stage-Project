@@ -1,2 +1,2 @@
 # Honors-Stage-Project
-enhancing video game NPC dialogue using Large Language Models
+Enhancing video game NPC dialogue using Large Language Models
