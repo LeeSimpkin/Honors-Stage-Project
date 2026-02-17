@@ -10,11 +10,12 @@ public class InteractableNPC : MonoBehaviour
     public TMPro.TextMeshProUGUI interactionPrompt;
     public TMPro.TextMeshProUGUI dialogueText;
     private TextFileManager loadInTextFile;
+    public TextFileManager TFM;
+    public TextAsset textFilePath;
     // Start is called before the first frame update
     void Start()
     {
         interactionPrompt.SetText("");
-        loadInTextFile = new TextFileManager();
         // Or assign via the Inspector: make `public LoadInTextFile loadInTextFile;` and set it in the editor
     }
 
@@ -27,13 +28,14 @@ public class InteractableNPC : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.E))
             {
                 Debug.Log("Interacted with NPC");
-                dialogueText.SetText(loadInTextFile.LoadText());
+                string text = TFM.LoadText(textFilePath);
+                dialogueText.SetText(text);
             }
         }
         else
         {
             interactionPrompt.SetText("");
         }
-
     }
+
 }
