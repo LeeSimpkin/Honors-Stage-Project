@@ -12,6 +12,8 @@ public class InteractableNPC : MonoBehaviour
     private TextFileManager loadInTextFile;
     public TextFileManager TFM;
     public TextAsset textFilePath;
+    public TextAsset playerInput;
+    private string inputText;
     // Start is called before the first frame update
     void Start()
     {
@@ -28,6 +30,8 @@ public class InteractableNPC : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.E))
             {
                 Debug.Log("Interacted with NPC");
+                inputText = playerInput.text;
+                System.Diagnostics.Process.Start("CMD.exe", $"ollama run llama3.2 {inputText}");
                 string text = TFM.LoadText(textFilePath);
                 dialogueText.SetText(text);
             }

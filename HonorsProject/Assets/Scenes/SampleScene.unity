@@ -926,8 +926,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 296, y: 279}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: 715.5947, y: 235.26758}
+  m_SizeDelta: {x: 1039.1895, y: 137.4648}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2010090257
 MonoBehaviour:
@@ -1040,6 +1040,10 @@ PrefabInstance:
       propertyPath: TFM
       value: 
       objectReference: {fileID: 373808905}
+    - target: {fileID: 2499263003705417790, guid: 211be6c1d28d4384b8f11395561589f5, type: 3}
+      propertyPath: playerInput
+      value: 
+      objectReference: {fileID: 4900000, guid: faa66c632d8ae044aa6b7ea031d1e0bf, type: 3}
     - target: {fileID: 2499263003705417790, guid: 211be6c1d28d4384b8f11395561589f5, type: 3}
       propertyPath: dialogueText
       value: 
