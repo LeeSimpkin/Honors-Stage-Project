@@ -127,6 +127,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1896689294}
     m_Modifications:
+    - target: {fileID: 2879092187326865100, guid: de36066308761a44aacf268db6839628, type: 3}
+      propertyPath: dialogueText
+      value: 
+      objectReference: {fileID: 2010090257}
     - target: {fileID: 8204268116611353374, guid: de36066308761a44aacf268db6839628, type: 3}
       propertyPath: m_Name
       value: TextFileManager
@@ -1040,6 +1044,10 @@ PrefabInstance:
       propertyPath: TFM
       value: 
       objectReference: {fileID: 373808905}
+    - target: {fileID: 2499263003705417790, guid: 211be6c1d28d4384b8f11395561589f5, type: 3}
+      propertyPath: NPCDialogue
+      value: 
+      objectReference: {fileID: 4900000, guid: c459475cf729e874eb918426cf908604, type: 3}
     - target: {fileID: 2499263003705417790, guid: 211be6c1d28d4384b8f11395561589f5, type: 3}
       propertyPath: playerInput
       value: 
