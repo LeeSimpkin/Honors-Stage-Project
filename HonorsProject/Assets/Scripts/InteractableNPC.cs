@@ -23,13 +23,11 @@ public class InteractableNPC : MonoBehaviour
     void Start()
     {
         interactionPrompt.SetText("");
-        // Or assign via the Inspector: make `public LoadInTextFile loadInTextFile;` and set it in the editor
     }
 
     // Update is called once per frame
     void Update()
     {
-        dialogueText.SetText(NPCDialogue.text);
         bool isInRange = Vector3.Distance(playerPosition.position, NPCPosition.position) < 2f;
         
         if (isInRange)
@@ -39,8 +37,8 @@ public class InteractableNPC : MonoBehaviour
             {
                 Debug.Log("Interacted with NPC");
                 inputText = playerInput.text;
-                System.Diagnostics.Process.Start("CMD.exe", "/C ollama run PriateLLM hello > \"Assets\\NPCLLMTool\\NPC\\NPCDialogue.txt\"");
-                
+                System.Diagnostics.Process.Start("CMD.exe", "/C ollama run Phi3 hello > \"Assets\\NPCLLMTool\\NPC\\NPCDialogue.txt\"");
+                dialogueText.SetText(NPCDialogue.text);
             }
             wasInRange = true;
         }

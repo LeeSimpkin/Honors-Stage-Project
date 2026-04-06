@@ -180,6 +180,35 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: de36066308761a44aacf268db6839628, type: 3}
+--- !u!1 &264889979 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6335881178937180122, guid: 211be6c1d28d4384b8f11395561589f5, type: 3}
+  m_PrefabInstance: {fileID: 4235971967806698255}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &264889982 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8252895433235960062, guid: 211be6c1d28d4384b8f11395561589f5, type: 3}
+  m_PrefabInstance: {fileID: 4235971967806698255}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &264889983
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 264889979}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d530e8509c478944494a5ee61b93dedb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerPosition: {fileID: 319281927}
+  NPCPosition: {fileID: 264889982}
+  interactionPrompt: {fileID: 1865329215}
+  dialogueText: {fileID: 2010090257}
+  TFM: {fileID: 373808905}
+  NPCDialogue: {fileID: 4900000, guid: 97c0a3dfae9063a4d805122967f2aea8, type: 3}
+  playerInput: {fileID: 4900000, guid: faa66c632d8ae044aa6b7ea031d1e0bf, type: 3}
 --- !u!1 &319281923
 GameObject:
   m_ObjectHideFlags: 0
@@ -649,6 +678,55 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!1 &1377458828
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1377458830}
+  - component: {fileID: 1377458829}
+  m_Layer: 0
+  m_Name: LLMTrain
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1377458829
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1377458828}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 988c74ee3ea91204ba700d2974c9c3bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stringInputs:
+  - Your name is Gary
+  - Gary loves cheese and brings this up in every conversation
+  selectedLLM: 1
+  npcName: 
+--- !u!4 &1377458830
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1377458828}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 279.56796, y: 183.54665, z: -5.972741}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1557528831
 GameObject:
   m_ObjectHideFlags: 0
@@ -1108,11 +1186,15 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 2499263003705417790, guid: 211be6c1d28d4384b8f11395561589f5, type: 3}
     m_RemovedGameObjects:
     - {fileID: 4135326035845728823, guid: 211be6c1d28d4384b8f11395561589f5, type: 3}
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6335881178937180122, guid: 211be6c1d28d4384b8f11395561589f5, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 264889983}
   m_SourcePrefab: {fileID: 100100000, guid: 211be6c1d28d4384b8f11395561589f5, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
@@ -1125,3 +1207,4 @@ SceneRoots:
   - {fileID: 1557528834}
   - {fileID: 885620659}
   - {fileID: 1896689294}
+  - {fileID: 1377458830}
