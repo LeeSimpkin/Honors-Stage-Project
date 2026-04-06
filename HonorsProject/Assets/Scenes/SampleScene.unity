@@ -694,7 +694,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1377458829
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -710,8 +710,8 @@ MonoBehaviour:
   stringInputs:
   - Your name is Gary
   - Gary loves cheese and brings this up in every conversation
-  selectedLLM: 1
-  npcName: 
+  selectedLLM: 0
+  npcName: Gary
 --- !u!4 &1377458830
 Transform:
   m_ObjectHideFlags: 0
