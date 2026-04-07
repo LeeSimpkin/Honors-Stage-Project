@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
 
 public class InteractableNPC : MonoBehaviour
@@ -13,7 +12,6 @@ public class InteractableNPC : MonoBehaviour
     public Transform NPCPosition;
     public TMPro.TextMeshProUGUI interactionPrompt;
     public TMPro.TextMeshProUGUI dialogueText;
-    private TextFileManager loadInTextFile;
     public TextFileManager TFM;
     public TextAsset NPCDialogue;
     public TextAsset playerInput;
@@ -21,19 +19,20 @@ public class InteractableNPC : MonoBehaviour
     private bool wasInRange = false;
     private bool isGeneratingDialogue = false;
 
+    [SerializeField] public List<string> forbiddenWords = new List<String>();
+    [SerializeField] public string fallbackText = "I have nothing to say.";
+
     private class ProcessResult
     {
         public string Output;
         public string Error;
     }
 
-    // Start is called before the first frame update
     void Start()
     {
         interactionPrompt.SetText("");
     }
 
-    // Update is called once per frame
     void Update()
     {
         bool isInRange = Vector3.Distance(playerPosition.position, NPCPosition.position) < 2f;
@@ -55,11 +54,9 @@ public class InteractableNPC : MonoBehaviour
             interactionPrompt.SetText("");
             dialogueText.SetText("");
 
-            // Clear the file when player leaves range
             if (wasInRange)
             {
-                string filePath = Path.Combine(Application.dataPath, "Assets\\NPCLLMTool\\NPC\\NPCDialogue.txt");
-                File.WriteAllText(filePath, string.Empty);
+                File.WriteAllText(GetNpcDialoguePath(), string.Empty);
                 wasInRange = false;
             }
         }
@@ -70,7 +67,7 @@ public class InteractableNPC : MonoBehaviour
         isGeneratingDialogue = true;
         dialogueText.SetText("...");
 
-        string outputPath = Path.Combine(Application.dataPath, "Assets\\NPCLLMTool\\NPC\\NPCDialogue.txt");
+        string outputPath = GetNpcDialoguePath();
         string prompt = string.IsNullOrWhiteSpace(inputText) ? "hello" : inputText;
         string escapedPrompt = prompt.Replace("\"", "\\\"");
 
@@ -79,9 +76,9 @@ public class InteractableNPC : MonoBehaviour
             var startInfo = new System.Diagnostics.ProcessStartInfo
             {
                 FileName = "ollama",
-                Arguments = $" run Phi3 {escapedPrompt} > NPCDialogue.txt",
+                Arguments = "run Phi3 \"" + escapedPrompt + "\"",
                 UseShellExecute = false,
-                RedirectStandardOutput = false,
+                RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 CreateNoWindow = true,
                 WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden
@@ -89,13 +86,13 @@ public class InteractableNPC : MonoBehaviour
 
             using (var process = System.Diagnostics.Process.Start(startInfo))
             {
-            //    string output = process.StandardOutput.ReadToEnd();
+                string output = process.StandardOutput.ReadToEnd();
                 string error = process.StandardError.ReadToEnd();
                 process.WaitForExit();
 
                 return new ProcessResult
                 {
-                //    Output = output,
+                    Output = output,
                     Error = error
                 };
             }
@@ -112,14 +109,33 @@ public class InteractableNPC : MonoBehaviour
         }
 
         ProcessResult result = task.Result;
-        //File.WriteAllText(outputPath, result.Output);
-        dialogueText.SetText(outputPath);
+        File.WriteAllText(outputPath, result.Output);
+        dialogueText.SetText(result.Output);
 
         if (!string.IsNullOrEmpty(result.Error))
         {
             Debug.LogWarning(result.Error);
         }
 
+#if UNITY_EDITOR
+        UnityEditor.AssetDatabase.Refresh();
+#endif
+
         isGeneratingDialogue = false;
+    }
+
+    private string GetNpcDialoguePath()
+    {
+#if UNITY_EDITOR
+        if (NPCDialogue != null)
+        {
+            string assetPath = UnityEditor.AssetDatabase.GetAssetPath(NPCDialogue);
+            if (!string.IsNullOrEmpty(assetPath))
+            {
+                return Path.GetFullPath(assetPath);
+            }
+        }
+#endif
+        return Path.Combine(Application.persistentDataPath, "NPCDialogue.txt");
     }
 }
