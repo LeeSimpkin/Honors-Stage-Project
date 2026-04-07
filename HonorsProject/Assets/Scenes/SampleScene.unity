@@ -180,6 +180,57 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: de36066308761a44aacf268db6839628, type: 3}
+--- !u!1 &255084274
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 255084275}
+  - component: {fileID: 255084276}
+  m_Layer: 0
+  m_Name: LLMOutputCheckerManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &255084275
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 255084274}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1896689294}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &255084276
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 255084274}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: befeb5fa50241e34194caf08a49a7329, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  textFileManager: {fileID: 0}
+  outputFilePath: {fileID: 0}
+  targetNpc: {fileID: 0}
+  fallbackText: Sorry, I don't understand.
+  wordChecks:
+  - fuck
+  - shit
 --- !u!1 &264889979 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6335881178937180122, guid: 211be6c1d28d4384b8f11395561589f5, type: 3}
@@ -209,6 +260,8 @@ MonoBehaviour:
   TFM: {fileID: 373808905}
   NPCDialogue: {fileID: 4900000, guid: 97c0a3dfae9063a4d805122967f2aea8, type: 3}
   playerInput: {fileID: 4900000, guid: faa66c632d8ae044aa6b7ea031d1e0bf, type: 3}
+  forbiddenWords: []
+  fallbackText: I have nothing to say.
 --- !u!1 &319281923
 GameObject:
   m_ObjectHideFlags: 0
@@ -720,12 +773,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1377458828}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 279.56796, y: 183.54665, z: -5.972741}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1896689294}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1557528831
 GameObject:
@@ -972,6 +1025,8 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 373808904}
+  - {fileID: 1377458830}
+  - {fileID: 255084275}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2010090255
@@ -1207,4 +1262,3 @@ SceneRoots:
   - {fileID: 1557528834}
   - {fileID: 885620659}
   - {fileID: 1896689294}
-  - {fileID: 1377458830}
