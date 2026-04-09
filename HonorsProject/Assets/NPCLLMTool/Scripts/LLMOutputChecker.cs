@@ -3,10 +3,12 @@ using UnityEngine;
 
 public class LLMOutputChecker
 {
-
-    public TextAsset LLMOutputChecker(List<string> forbiddenWords, TextAsset outputFile, string fallbackText)
+    public LLMOutputChecker()
     {
-        if(outputFile == null)
+    }
+    public TextAsset CheckOutput(List<string> forbiddenWords, TextAsset outputFile, string fallbackText)
+    {
+        if (outputFile == null)
         {
             Debug.LogWarning("Output file is null. Using fallback text.");
             return new TextAsset(fallbackText);
@@ -25,5 +27,4 @@ public class LLMOutputChecker
             return outputFile;
         }
     }
-
 }

@@ -6,77 +6,44 @@ using System.Threading.Tasks;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class InteractableNPC : MonoBehaviour
+public class NPCToLLM : MonoBehaviour 
 {
-    public Transform playerPosition;
-    public Transform NPCPosition;
-    public TMPro.TextMeshProUGUI interactionPrompt;
-    public TMPro.TextMeshProUGUI dialogueText;
     public TextFileManager TFM;
     public TextAsset NPCDialogue;
     public TextAsset playerInput;
     private string inputText;
-    private bool wasInRange = false;
-    private bool isGeneratingDialogue = false;
+    public bool isGeneratingDialogue = false;
 
     [SerializeField] public List<string> forbiddenWords = new List<String>();
     [SerializeField] public string fallbackText = "I have nothing to say.";
 
-    private class ProcessResult
+    public NPCToLLM()
     {
-        public string Output;
-        public string Error;
+        TFM = new TextFileManager();
+        inputText = playerInput != null ? playerInput.text : "hello";
     }
 
-    void Start()
+    public void StartProcess()
     {
-        interactionPrompt.SetText("");
-    }
-
-    void Update()
-    {
-        bool isInRange = Vector3.Distance(playerPosition.position, NPCPosition.position) < 2f;
-
-        if (isInRange)
-        {
-            interactionPrompt.SetText("Press E to interact");
-            if (Input.GetKeyDown(KeyCode.E) && !isGeneratingDialogue)
-            {
-                Debug.Log("Interacted with NPC");
-                inputText = playerInput != null ? playerInput.text : "hello";
-                StartCoroutine(RunOllamaNonBlocking());
-            }
-
-            wasInRange = true;
-        }
-        else
-        {
-            interactionPrompt.SetText("");
-            dialogueText.SetText("");
-
-            if (wasInRange)
-            {
-                File.WriteAllText(GetNpcDialoguePath(), string.Empty);
-                wasInRange = false;
-            }
-        }
+        StartCoroutine(RunOllamaNonBlocking());
     }
 
     private IEnumerator RunOllamaNonBlocking()
     {
+        Debug.Log("Called RunOllamaNonBlocking");
         isGeneratingDialogue = true;
-        dialogueText.SetText("...");
 
         string outputPath = GetNpcDialoguePath();
         string prompt = string.IsNullOrWhiteSpace(inputText) ? "hello" : inputText;
-        string escapedPrompt = prompt.Replace("\"", "\\\"");
+        //string escapedPrompt = prompt.Replace("\"", "\\\"");
 
         Task<ProcessResult> task = Task.Run(() =>
         {
+            Debug.Log("Sending prompt to Ollama: " + prompt);
             var startInfo = new System.Diagnostics.ProcessStartInfo
             {
                 FileName = "ollama",
-                Arguments = "run Phi3 \"" + escapedPrompt + "\"",
+                Arguments = "run Phi3 \"" + prompt + "\"",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -103,14 +70,12 @@ public class InteractableNPC : MonoBehaviour
         if (task.IsFaulted)
         {
             Debug.LogError(task.Exception);
-            dialogueText.SetText("Error generating dialogue.");
             isGeneratingDialogue = false;
             yield break;
         }
-
+        Debug.Log("Ollama process completed.");
         ProcessResult result = task.Result;
         File.WriteAllText(outputPath, result.Output);
-        dialogueText.SetText(result.Output);
 
         if (!string.IsNullOrEmpty(result.Error))
         {
@@ -124,18 +89,24 @@ public class InteractableNPC : MonoBehaviour
         isGeneratingDialogue = false;
     }
 
-    private string GetNpcDialoguePath()
+    public string GetNpcDialoguePath()
     {
 #if UNITY_EDITOR
-        if (NPCDialogue != null)
+
+
+        string assetPath = UnityEditor.AssetDatabase.GetAssetPath(NPCDialogue);
+        if (!string.IsNullOrEmpty(assetPath))
         {
-            string assetPath = UnityEditor.AssetDatabase.GetAssetPath(NPCDialogue);
-            if (!string.IsNullOrEmpty(assetPath))
-            {
-                return Path.GetFullPath(assetPath);
-            }
+            return Path.GetFullPath(assetPath);
         }
+
 #endif
         return Path.Combine(Application.persistentDataPath, "OllamaOutputs.txt");
+    }
+
+    private class ProcessResult
+    {
+        public string Output;
+        public string Error;
     }
 }

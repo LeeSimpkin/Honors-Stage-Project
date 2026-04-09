@@ -5,7 +5,7 @@ using System;
 public class TextFileManager : MonoBehaviour
 {
     public TMPro.TextMeshProUGUI dialogueText;
-    public TextAsset textFileReference; 
+    public TextAsset textFileReference;
 
 
 
