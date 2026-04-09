@@ -136,6 +136,6 @@ public class InteractableNPC : MonoBehaviour
             }
         }
 #endif
-        return Path.Combine(Application.persistentDataPath, "NPCDialogue.txt");
+        return Path.Combine(Application.persistentDataPath, "OllamaOutputs.txt");
     }
 }

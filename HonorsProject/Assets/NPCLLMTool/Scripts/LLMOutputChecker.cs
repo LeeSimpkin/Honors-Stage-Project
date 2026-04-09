@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LLMOutptChecker
+public class LLMOutputChecker
 {
 
     public TextAsset LLMOutputChecker(List<string> forbiddenWords, TextAsset outputFile, string fallbackText)
