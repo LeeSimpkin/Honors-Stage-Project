@@ -189,7 +189,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 255084275}
-  - component: {fileID: 255084276}
   m_Layer: 0
   m_Name: LLMOutputCheckerManager
   m_TagString: Untagged
@@ -212,25 +211,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1896689294}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &255084276
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 255084274}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: befeb5fa50241e34194caf08a49a7329, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  textFileManager: {fileID: 0}
-  outputFilePath: {fileID: 0}
-  targetNpc: {fileID: 0}
-  fallbackText: Sorry, I don't understand.
-  wordChecks:
-  - fuck
-  - shit
 --- !u!1 &264889979 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6335881178937180122, guid: 211be6c1d28d4384b8f11395561589f5, type: 3}
@@ -241,7 +221,7 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8252895433235960062, guid: 211be6c1d28d4384b8f11395561589f5, type: 3}
   m_PrefabInstance: {fileID: 4235971967806698255}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &264889983
+--- !u!114 &264889985
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1249,7 +1229,7 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 6335881178937180122, guid: 211be6c1d28d4384b8f11395561589f5, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 264889983}
+      addedObject: {fileID: 264889985}
   m_SourcePrefab: {fileID: 100100000, guid: 211be6c1d28d4384b8f11395561589f5, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
