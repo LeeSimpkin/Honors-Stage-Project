@@ -1,8 +1,8 @@
-using Assets.Scripts;
+using UnityEngine;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Assets.Scripts;
 using Unity.VisualScripting;
-using UnityEngine;
 
 public class LLMTraining : MonoBehaviour
 {
@@ -25,7 +25,6 @@ public class LLMTraining : MonoBehaviour
     [SerializeField]
     private string npcName;
 
-    
     private LLMModelType.LLMModelTypes SelectedLLM
     {
         get
@@ -42,12 +41,12 @@ public class LLMTraining : MonoBehaviour
 
     private void Start()
     {
-        var description = SelectedLLM.Description();
+        string selectedModelName = SelectedLLM.Description().ToString();
 
         foreach (string s in stringInputs)
         {
             UnityEngine.Debug.Log("String Input: " + s);
-            Process.Start("CMD.exe", $"/C ollama run {description} \"{s}\"");
+            Process.Start("CMD.exe", $"/C ollama run {selectedModelName} \"{s}\"");
         }
 
         Process.Start("CMD.exe", $"/C ollama save {npcName}");

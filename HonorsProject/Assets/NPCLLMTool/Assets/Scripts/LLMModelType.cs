@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
+using UnityEngine;
 
 namespace Assets.Scripts
 {
@@ -11,10 +7,15 @@ namespace Assets.Scripts
     {
         public enum LLMModelTypes
         {
+            [InspectorName("Phi3")]
             [Description("Phi3")]
             Phi3,
+
+            [InspectorName("Llama3.2")]
             [Description("Llama3.2")]
             Llama3_2,
+
+            [InspectorName("TinyLlama")]
             [Description("TinyLlama")]
             TinyLlama
         }

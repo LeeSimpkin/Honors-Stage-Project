@@ -14,3 +14,14 @@ Write-Host "Downloading model..."
 }
 
 Write-Host "Done."
+
+$source = "$PSScriptRoot..\models"
+$dest = "$env.ollama\models"
+
+Write-Host "Copying models..."
+
+New-Item -ItemType Directory -Force -Path $dest
+
+Copy-Item -Path "$source*" -Destination $dest -Recurse -Force
+
+Write-Host "Models copied"
