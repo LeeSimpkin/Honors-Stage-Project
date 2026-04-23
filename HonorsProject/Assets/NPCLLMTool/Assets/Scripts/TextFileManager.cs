@@ -1,25 +1,23 @@
 using UnityEngine;
-using System.IO;
 using System;
 
 public class TextFileManager : MonoBehaviour
 {
+    public static TextFileManager Instance { get; private set; }
+
     public TMPro.TextMeshProUGUI dialogueText;
     public TextAsset textFileReference;
 
-
-
-    public TextFileManager()
+    private void Awake()
     {
-        // Default constructor
-    }
-    void Start()
-    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
 
-    }
-    void Update()
-    {
-
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
     }
 
     public string LoadText(TextAsset filePath)
@@ -28,10 +26,8 @@ public class TextFileManager : MonoBehaviour
         {
             return filePath.text;
         }
-        else
-        {
-            Debug.LogError("Failed to load text file at path: " + filePath);
-            return "Failed to find text file";
-        }
+
+        Debug.LogError("Failed to load text file at path: " + filePath);
+        return "Failed to find text file";
     }
 }

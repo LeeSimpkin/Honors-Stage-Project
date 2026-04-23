@@ -2,20 +2,22 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Assets.Scripts;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class NPCToLLM : MonoBehaviour
 {
-    public TextFileManager TFM;
+    private TextFileManager TFM => TextFileManager.Instance;
     public TextAsset NPCDialogue;
     public TextAsset playerInput;
-    private string inputText;
     public bool isGeneratingDialogue = false;
 
-    [SerializeField] public List<string> forbiddenWords = new List<String>();
+    // Fired when dialogue is ready — InteractableNPC subscribes to this
+    public event Action<string> OnDialogueReady;
+
+    [SerializeField] public List<string> forbiddenWords = new List<string>();
     [SerializeField] public string fallbackText = "I have nothing to say.";
 
     [Header("LLM Options")]
@@ -23,33 +25,28 @@ public class NPCToLLM : MonoBehaviour
     [SerializeField]
     private LLMModelType.LLMModelTypes selectedLLM;
 
+
     public void StartProcess()
     {
-        inputText = GetPromptText();
         StartCoroutine(RunOllamaNonBlocking());
-        //RunOllamaBlocking();
     }
 
+    // FIX: Read playerInput fresh each time, no stale inputText field
     private string GetPromptText()
     {
-        if (!string.IsNullOrWhiteSpace(inputText))
-        {
-            return inputText;
-        }
-
         if (playerInput != null && !string.IsNullOrWhiteSpace(playerInput.text))
         {
             return playerInput.text;
         }
-
         return "hello";
     }
 
-    private void RunOllamaBlocking()
+    // FIX: Strip ANSI/VT100 escape sequences Ollama emits when stdout is redirected
+    private static string StripAnsiCodes(string input)
     {
-        string prompt = GetPromptText();
-        string selectedModelName = selectedLLM.Description().ToString();
-        System.Diagnostics.Process.Start("cmd.exe", $"/C ollama run {selectedModelName} {prompt} > {GetNpcDialoguePath()}");
+        if (string.IsNullOrEmpty(input)) return input;
+        // Matches ESC[ ... m/K/J/H/A/B/C/D sequences and lone backspace-style codes
+        return Regex.Replace(input, @"\x1B\[[0-9;]*[A-Za-z]|\x1B\[[0-9]*[A-Za-z]|\x08", string.Empty);
     }
 
     private IEnumerator RunOllamaNonBlocking()
@@ -73,6 +70,10 @@ public class NPCToLLM : MonoBehaviour
                 RedirectStandardError = true,
                 CreateNoWindow = true,
             };
+
+            // Tell Ollama it is NOT a TTY so it won't emit colour/cursor codes
+            startInfo.EnvironmentVariables["NO_COLOR"] = "1";
+            startInfo.EnvironmentVariables["TERM"] = "dumb";
 
             using (var process = System.Diagnostics.Process.Start(startInfo))
             {
@@ -111,23 +112,31 @@ public class NPCToLLM : MonoBehaviour
 
         Debug.Log("Ollama process completed.");
         ProcessResult result = task.Result;
-        File.WriteAllText(outputPath, result.Output);
 
         if (result.ExitCode != 0)
-        {
             Debug.LogError("Ollama exited with code " + result.ExitCode);
-        }
 
         if (!string.IsNullOrEmpty(result.Error))
-        {
-            Debug.LogWarning(result.Error);
-        }
+            Debug.LogWarning("Ollama stderr: " + result.Error);
+
+        // FIX: Strip ANSI codes before doing anything with the output
+        string cleanOutput = StripAnsiCodes(result.Output).Trim();
+
+        // Run the output checker before writing/displaying
+        LLMOutputChecker checker = new LLMOutputChecker();
+        string finalText = checker.CheckOutput(forbiddenWords, cleanOutput, fallbackText);
+
+        // Write cleaned output to disk
+        File.WriteAllText(outputPath, finalText);
 
 #if UNITY_EDITOR
         UnityEditor.AssetDatabase.Refresh();
 #endif
 
         isGeneratingDialogue = false;
+
+        // FIX: Notify InteractableNPC that the text is ready, passing it directly
+        OnDialogueReady?.Invoke(finalText);
     }
 
     public string GetNpcDialoguePath()

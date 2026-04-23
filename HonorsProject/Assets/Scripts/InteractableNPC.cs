@@ -1,9 +1,4 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class InteractableNPC : MonoBehaviour
@@ -12,20 +7,17 @@ public class InteractableNPC : MonoBehaviour
     public Transform NPCPosition;
     public TMPro.TextMeshProUGUI interactionPrompt;
     public TMPro.TextMeshProUGUI dialogueText;
+
     private bool wasInRange = false;
-    [SerializeField] private NPCToLLM npcTollm;
+
+    private NPCToLLM npcTollm;
     [SerializeField] private TextAsset npcDialogueAsset;
     [SerializeField] private TextAsset playerInputAsset;
-
-    private class ProcessResult
-    {
-        public string Output;
-        public string Error;
-    }
 
     void Start()
     {
         interactionPrompt.SetText("");
+        dialogueText.SetText("");
 
         if (npcTollm == null)
         {
@@ -34,6 +26,22 @@ public class InteractableNPC : MonoBehaviour
 
         npcTollm.NPCDialogue = npcDialogueAsset;
         npcTollm.playerInput = playerInputAsset;
+
+        // FIX: Subscribe to the event so we update the UI when Ollama is actually done
+        npcTollm.OnDialogueReady += HandleDialogueReady;
+    }
+
+    void OnDestroy()
+    {
+        // Always unsubscribe to avoid memory leaks / dangling references
+        if (npcTollm != null)
+            npcTollm.OnDialogueReady -= HandleDialogueReady;
+    }
+
+    // Called by NPCToLLM once Ollama has finished and output is clean
+    private void HandleDialogueReady(string dialogue)
+    {
+        dialogueText.SetText(dialogue);
     }
 
     void Update()
@@ -42,12 +50,21 @@ public class InteractableNPC : MonoBehaviour
 
         if (isInRange)
         {
-            interactionPrompt.SetText("Press E to interact");
-            if (Input.GetKeyDown(KeyCode.E) && !npcTollm.isGeneratingDialogue)
+            // Show "generating..." while waiting, so the player knows something is happening
+            if (npcTollm.isGeneratingDialogue)
             {
-                Debug.Log("Interacted with NPC");
-                npcTollm.StartProcess();
-                dialogueText.SetText(npcDialogueAsset.text);
+                interactionPrompt.SetText("Generating response...");
+            }
+            else
+            {
+                interactionPrompt.SetText("Press E to interact");
+
+                if (Input.GetKeyDown(KeyCode.E))
+                {
+                    Debug.Log("Interacted with NPC");
+                    dialogueText.SetText("..."); // placeholder while generating
+                    npcTollm.StartProcess();
+                }
             }
 
             wasInRange = true;
@@ -57,17 +74,13 @@ public class InteractableNPC : MonoBehaviour
             interactionPrompt.SetText("");
             dialogueText.SetText("");
 
-            if (wasInRange)
+            // FIX: Only clear the output file when NOT generating, to avoid wiping live output
+            if (wasInRange && !npcTollm.isGeneratingDialogue)
             {
                 File.WriteAllText(npcTollm.GetNpcDialoguePath(), string.Empty);
-                wasInRange = false; 
             }
 
+            wasInRange = false;
         }
     }
 }
-
-
-
-
-
