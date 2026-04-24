@@ -7,9 +7,9 @@ public class Bootstrap : MonoBehaviour
     void Start()
     {
         string flagPath = Application.persistentDataPath + "/setup_done.txt";
+        UnityEngine.Debug.Log("Bootstrap: Checking for setup flag at " + flagPath); 
 
-
-    if (!File.Exists(flagPath))
+        if (!File.Exists(flagPath))
         {
             RunSetup();
             File.WriteAllText(flagPath, "done");
