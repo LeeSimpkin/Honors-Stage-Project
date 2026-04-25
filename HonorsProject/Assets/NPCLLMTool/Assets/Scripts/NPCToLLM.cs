@@ -25,10 +25,32 @@ public class NPCToLLM : MonoBehaviour
     [SerializeField]
     private LLMModelType.LLMModelTypes selectedLLM;
 
+    [Header("Training")]
+    [Tooltip("Optional training component that provides a startup-created runtime model.")]
+    [SerializeField]
+    private LLMTraining llmTraining;
+
+    private void Awake()
+    {
+        if (llmTraining == null)
+        {
+            llmTraining = GetComponent<LLMTraining>();
+        }
+    }
+
 
     public void StartProcess()
     {
-        StartCoroutine(RunOllamaNonBlocking());
+        if(llmTraining != null && !string.IsNullOrWhiteSpace(llmTraining.RuntimeModelName))
+        {
+            Debug.Log("Starting Ollama with trained model: " + llmTraining.RuntimeModelName);
+            StartCoroutine(RunOllamaNonBlocking(llmTraining.RuntimeModelName));
+        }
+        else
+        {
+            Debug.Log("Starting Ollama with selected model: " + selectedLLM.Description());
+            StartCoroutine(RunOllamaNonBlocking(selectedLLM.Description()));
+        }
     }
 
     // FIX: Read playerInput fresh each time, no stale inputText field
@@ -49,7 +71,7 @@ public class NPCToLLM : MonoBehaviour
         return Regex.Replace(input, @"\x1B\[[0-9;]*[A-Za-z]|\x1B\[[0-9]*[A-Za-z]|\x08", string.Empty);
     }
 
-    private IEnumerator RunOllamaNonBlocking()
+    private IEnumerator RunOllamaNonBlocking(string modelName)
     {
         Debug.Log("Called RunOllamaNonBlocking");
         isGeneratingDialogue = true;
@@ -57,6 +79,10 @@ public class NPCToLLM : MonoBehaviour
         string outputPath = GetNpcDialoguePath();
         string prompt = GetPromptText();
         string selectedModelName = selectedLLM.Description().ToString();
+        if (llmTraining != null)
+        {
+            selectedModelName = llmTraining.RuntimeModelName;
+        }
         string escapedPrompt = prompt.Replace("\"", "\\\"");
 
         Task<ProcessResult> task = Task.Run(() =>
@@ -64,7 +90,7 @@ public class NPCToLLM : MonoBehaviour
             var startInfo = new System.Diagnostics.ProcessStartInfo
             {
                 FileName = "cmd.exe",
-                Arguments = "/C ollama run \"" + selectedModelName + "\" \"" + escapedPrompt + "\"",
+                Arguments = "/C ollama run \"" + modelName + "\" \"" + escapedPrompt + "\"",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,

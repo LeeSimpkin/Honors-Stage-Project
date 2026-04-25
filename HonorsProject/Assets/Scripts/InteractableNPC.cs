@@ -19,6 +19,8 @@ public class InteractableNPC : MonoBehaviour
         interactionPrompt.SetText("");
         dialogueText.SetText("");
 
+        npcTollm = GetComponent<NPCToLLM>();
+
         if (npcTollm == null)
         {
             npcTollm = gameObject.AddComponent<NPCToLLM>();
