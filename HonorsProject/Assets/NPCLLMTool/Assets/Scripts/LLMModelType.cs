@@ -19,9 +19,9 @@ namespace Assets.Scripts
     {
         public enum LLMModelTypes
         {
-            [InspectorName("Phi-3 Mini (3.8B)")]
-            [Description("Phi3")]
-            Phi3,
+            [InspectorName("qwen2.5 (0.5B)")]
+            [Description("qwen2.5")]
+            Qwen2_5,
 
             [InspectorName("Llama 3.2 (3B)")]
             [Description("Llama3.2")]
@@ -38,7 +38,7 @@ namespace Assets.Scripts
         ///
         /// Example Assets/NPCLLMTool/Build/llama/ folder contents:
         ///   llama-server.exe
-        ///   Phi-3-mini-4k-instruct-q4.gguf
+        ///   qwen2.5-0.5b-instruct-fp16.gguf
         ///   Llama-3.2-3B-Instruct-Q4_K_M.gguf
         ///   tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf
         /// </summary>
@@ -46,8 +46,8 @@ namespace Assets.Scripts
         {
             switch (modelType)
             {
-                case LLMModelTypes.Phi3:
-                    return "Phi-3-mini-4k-instruct-q4.gguf";
+                case LLMModelTypes.Qwen2_5:
+                    return "qwen2.5-0.5b-instruct-fp16.gguf";
 
                 case LLMModelTypes.Llama3_2:
                     return "Llama-3.2-3B-Instruct-Q4_K_M.gguf";

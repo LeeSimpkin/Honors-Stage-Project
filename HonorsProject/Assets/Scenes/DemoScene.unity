@@ -330,17 +330,17 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 373154189}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.3125, y: 0.5375, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1202986472}
-  m_Father: {fileID: 2068437240}
+  m_Father: {fileID: 1586953591}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -439, y: 262.77}
+  m_AnchoredPosition: {x: 90, y: 23.620026}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &373154191
@@ -562,8 +562,10 @@ MonoBehaviour:
   isGeneratingDialogue: 0
   forbiddenWords: []
   fallbackText: I have nothing to say.
-  selectedLLM: 2
-  systemPrompt: You are a helpful NPC in a fantasy game. Keep your replies brief.
+  selectedLLM: 1
+  systemPrompt: "You are a blacksmith named Aldric. You are gruff and proud of your
+    craft. \nRespond directly to your prompts in one or two short sentences. \nNever
+    break character. "
 --- !u!114 &450900659
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -700,7 +702,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: -1.5648193, w: 1.9305115}
+  m_margin: {x: 0, y: -75.31995, z: -1.5648193, w: -75.81918}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -901,7 +903,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -308, y: -209}
+  m_AnchoredPosition: {x: -567, y: -186}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1058607009
@@ -989,7 +991,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 0, y: 0, z: 0, w: -51.02321}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -1407,11 +1409,12 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 660492698}
+  - {fileID: 373154190}
   m_Father: {fileID: 2068437240}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -529, y: 239.15}
+  m_AnchoredPosition: {x: -530, y: 310}
   m_SizeDelta: {x: 255.8989, y: 77.2338}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1586953592
@@ -1587,7 +1590,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 2, y: 19}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1808900797
@@ -1786,7 +1789,6 @@ RectTransform:
   - {fileID: 1058607008}
   - {fileID: 625862294}
   - {fileID: 1586953591}
-  - {fileID: 373154190}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
