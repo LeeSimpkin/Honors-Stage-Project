@@ -20,16 +20,15 @@ public class InteractableNPC : MonoBehaviour
         dialogueText.SetText("");
 
         npcTollm = GetComponent<NPCToLLM>();
-
         if (npcTollm == null)
         {
-            npcTollm = gameObject.AddComponent<NPCToLLM>();
+            Debug.LogError("NPCToLLM is required on this NPC but is missing.");
+            enabled = false;
+            return;
         }
 
         npcTollm.NPCDialogue = npcDialogueAsset;
         npcTollm.playerInput = playerInputAsset;
-
-        // FIX: Subscribe to the event so we update the UI when Ollama is actually done
         npcTollm.OnDialogueReady += HandleDialogueReady;
     }
 
@@ -50,7 +49,7 @@ public class InteractableNPC : MonoBehaviour
     {
         bool isInRange = Vector3.Distance(playerPosition.position, NPCPosition.position) < 2f;
 
-        if (isInRange)
+        if (isInRange && !PlayerInputSaver.MovementDisabled)
         {
             // Show "generating..." while waiting, so the player knows something is happening
             if (npcTollm.isGeneratingDialogue)

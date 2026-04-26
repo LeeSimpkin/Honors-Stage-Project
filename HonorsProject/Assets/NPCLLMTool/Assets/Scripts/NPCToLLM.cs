@@ -2,58 +2,181 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using Assets.Scripts;
 using UnityEngine;
+using Assets.Scripts;
 
+/// <summary>
+/// Connects an NPC to the local llama-server via LLMHttpClient.
+///
+/// Replaces the original "ollama run" subprocess approach.
+/// All existing public members (OnDialogueReady, forbiddenWords, fallbackText,
+/// isGeneratingDialogue, StartProcess) are preserved so that InteractableNPC
+/// and any other subscribers require no changes.
+///
+/// Requires:
+///   - LLMServerManager running in the scene (started before this is called)
+///   - LLMHttpClient attached to the same GameObject
+/// </summary>
 public class NPCToLLM : MonoBehaviour
 {
+    // -------------------------------------------------------------------------
+    // Public fields — kept identical to the original so nothing else breaks
+    // -------------------------------------------------------------------------
+
     private TextFileManager TFM => TextFileManager.Instance;
-    public TextAsset NPCDialogue;
+
     public TextAsset playerInput;
+    public TextAsset NPCDialogue;    // Still used to determine the output file path
     public bool isGeneratingDialogue = false;
 
-    // Fired when dialogue is ready — InteractableNPC subscribes to this
+    /// <summary>
+    /// Fired when dialogue is ready. InteractableNPC subscribes to this — no changes needed there.
+    /// </summary>
     public event Action<string> OnDialogueReady;
 
     [SerializeField] public List<string> forbiddenWords = new List<string>();
     [SerializeField] public string fallbackText = "I have nothing to say.";
 
-    [Header("LLM Options")]
-    [Tooltip("Choose the LLM used by this NPC.")]
-    [SerializeField]
-    private LLMModelType.LLMModelTypes selectedLLM;
+    // -------------------------------------------------------------------------
+    // New fields replacing LLMTraining and the model-selection approach
+    // -------------------------------------------------------------------------
 
-    [Header("Training")]
-    [Tooltip("Optional training component that provides a startup-created runtime model.")]
-    [SerializeField]
-    private LLMTraining llmTraining;
+    [Header("LLM Options")]
+    [Tooltip("The model this NPC uses. Must match a filename in StreamingAssets/LLM/ " +
+             "and the model loaded by LLMServerManager.")]
+    [SerializeField] private LLMModelType.LLMModelTypes selectedLLM;
+
+    [Header("NPC Personality")]
+    [Tooltip("Describe who this NPC is. This is sent as the system prompt to the LLM " +
+             "and replaces the Ollama modelfile approach.\n\n" +
+             "Example: 'You are a grumpy blacksmith named Aldric in a medieval village. " +
+             "Keep replies to two sentences.'")]
+    [TextArea(4, 10)]
+    [SerializeField] private string systemPrompt = "You are a helpful NPC in a fantasy game. Keep your replies brief.";
+
+    // -------------------------------------------------------------------------
+    // Private references — populated in Awake
+    // -------------------------------------------------------------------------
+
+    private LLMHttpClient _httpClient;
 
     private void Awake()
     {
-        if (llmTraining == null)
+        _httpClient = GetComponent<LLMHttpClient>();
+
+        if (_httpClient == null)
         {
-            llmTraining = GetComponent<LLMTraining>();
+            UnityEngine.Debug.LogError(
+                "[NPCToLLM] No LLMHttpClient component found on " + gameObject.name +
+                ". Please add LLMHttpClient to the same GameObject.");
         }
     }
 
+    // -------------------------------------------------------------------------
+    // Public API — identical signature to original StartProcess()
+    // -------------------------------------------------------------------------
 
+    /// <summary>
+    /// Begins generating dialogue for this NPC.
+    /// Called by InteractableNPC exactly as before — no changes required there.
+    /// </summary>
     public void StartProcess()
     {
-        if(llmTraining != null && !string.IsNullOrWhiteSpace(llmTraining.RuntimeModelName))
+        if (isGeneratingDialogue)
         {
-            Debug.Log("Starting Ollama with trained model: " + llmTraining.RuntimeModelName);
-            StartCoroutine(RunOllamaNonBlocking(llmTraining.RuntimeModelName));
+            UnityEngine.Debug.LogWarning("[NPCToLLM] Already generating dialogue. Request ignored.");
+            return;
         }
-        else
+
+        if (LLMServerManager.Instance == null || !LLMServerManager.Instance.IsServerReady)
         {
-            Debug.Log("Starting Ollama with selected model: " + selectedLLM.Description());
-            StartCoroutine(RunOllamaNonBlocking(selectedLLM.Description()));
+            UnityEngine.Debug.LogError(
+                "[NPCToLLM] LLMServerManager is not ready. " +
+                "Make sure LLMServerManager.StartServer() has completed before calling StartProcess().");
+            return;
         }
+
+        if (_httpClient == null)
+        {
+            UnityEngine.Debug.LogError("[NPCToLLM] Cannot start: LLMHttpClient is missing.");
+            return;
+        }
+
+        StartCoroutine(RequestDialogue());
     }
 
-    // FIX: Read playerInput fresh each time, no stale inputText field
+    // -------------------------------------------------------------------------
+    // Private implementation
+    // -------------------------------------------------------------------------
+
+    /// <summary>
+    /// Reads the player's input, sends it to llama-server, filters the reply,
+    /// writes it to disk, and fires OnDialogueReady — same flow as the original.
+    /// </summary>
+    private IEnumerator RequestDialogue()
+    {
+        isGeneratingDialogue = true;
+
+        string prompt = GetPromptText();
+        string serverUrl = LLMServerManager.Instance.ServerUrl;
+
+        UnityEngine.Debug.Log("[NPCToLLM] Requesting dialogue. Prompt: " + prompt);
+
+        // Result holders — populated by the callbacks below
+        string replyText = null;
+        string errorText = null;
+        bool callbackFired = false;
+
+        // Delegate the HTTP call to LLMHttpClient (keeps HTTP logic out of this class)
+        yield return StartCoroutine(_httpClient.SendChatRequest(
+            serverUrl,
+            systemPrompt,
+            prompt,
+            onSuccess: reply =>
+            {
+                replyText = reply;
+                callbackFired = true;
+            },
+            onError: error =>
+            {
+                errorText = error;
+                callbackFired = true;
+            }
+        ));
+
+        // Wait for the callback to fire (should already be done, but safety guard)
+        yield return new WaitUntil(() => callbackFired);
+
+        if (!string.IsNullOrEmpty(errorText))
+        {
+            UnityEngine.Debug.LogError("[NPCToLLM] Failed to get reply: " + errorText);
+            isGeneratingDialogue = false;
+            yield break;
+        }
+
+        // Run through the existing output checker — unchanged from original
+        LLMOutputChecker checker = new LLMOutputChecker();
+        string finalText = checker.CheckOutput(forbiddenWords, replyText, fallbackText);
+
+        // Write to disk — preserved from original so any file-reading code still works
+        string outputPath = GetNpcDialoguePath();
+        File.WriteAllText(outputPath, finalText);
+
+#if UNITY_EDITOR
+        UnityEditor.AssetDatabase.Refresh();
+#endif
+
+        isGeneratingDialogue = false;
+
+        UnityEngine.Debug.Log("[NPCToLLM] Dialogue ready: " + finalText);
+
+        // Fire the event — InteractableNPC receives this exactly as before
+        OnDialogueReady?.Invoke(finalText);
+    }
+
+    /// <summary>
+    /// Reads the player's prompt text. Preserved from original.
+    /// </summary>
     private string GetPromptText()
     {
         if (playerInput != null && !string.IsNullOrWhiteSpace(playerInput.text))
@@ -63,124 +186,21 @@ public class NPCToLLM : MonoBehaviour
         return "hello";
     }
 
-    // FIX: Strip ANSI/VT100 escape sequences Ollama emits when stdout is redirected
-    private static string StripAnsiCodes(string input)
-    {
-        if (string.IsNullOrEmpty(input)) return input;
-        // Matches ESC[ ... m/K/J/H/A/B/C/D sequences and lone backspace-style codes
-        return Regex.Replace(input, @"\x1B\[[0-9;]*[A-Za-z]|\x1B\[[0-9]*[A-Za-z]|\x08", string.Empty);
-    }
-
-    private IEnumerator RunOllamaNonBlocking(string modelName)
-    {
-        Debug.Log("Called RunOllamaNonBlocking");
-        isGeneratingDialogue = true;
-
-        string outputPath = GetNpcDialoguePath();
-        string prompt = GetPromptText();
-        string selectedModelName = selectedLLM.Description().ToString();
-        if (llmTraining != null)
-        {
-            selectedModelName = llmTraining.RuntimeModelName;
-        }
-        string escapedPrompt = prompt.Replace("\"", "\\\"");
-
-        Task<ProcessResult> task = Task.Run(() =>
-        {
-            var startInfo = new System.Diagnostics.ProcessStartInfo
-            {
-                FileName = "cmd.exe",
-                Arguments = "/C ollama run \"" + modelName + "\" \"" + escapedPrompt + "\"",
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                CreateNoWindow = true,
-            };
-
-            // Tell Ollama it is NOT a TTY so it won't emit colour/cursor codes
-            startInfo.EnvironmentVariables["NO_COLOR"] = "1";
-            startInfo.EnvironmentVariables["TERM"] = "dumb";
-
-            using (var process = System.Diagnostics.Process.Start(startInfo))
-            {
-                if (process == null)
-                {
-                    return new ProcessResult
-                    {
-                        Output = string.Empty,
-                        Error = "Failed to start Ollama process."
-                    };
-                }
-
-                Task<string> outputTask = process.StandardOutput.ReadToEndAsync();
-                Task<string> errorTask = process.StandardError.ReadToEndAsync();
-
-                process.WaitForExit();
-                Task.WaitAll(outputTask, errorTask);
-
-                return new ProcessResult
-                {
-                    Output = outputTask.Result,
-                    Error = errorTask.Result,
-                    ExitCode = process.ExitCode
-                };
-            }
-        });
-
-        yield return new WaitUntil(() => task.IsCompleted);
-
-        if (task.IsFaulted)
-        {
-            Debug.LogError(task.Exception);
-            isGeneratingDialogue = false;
-            yield break;
-        }
-
-        Debug.Log("Ollama process completed.");
-        ProcessResult result = task.Result;
-
-        if (result.ExitCode != 0)
-            Debug.LogError("Ollama exited with code " + result.ExitCode);
-
-        if (!string.IsNullOrEmpty(result.Error))
-            Debug.LogWarning("Ollama stderr: " + result.Error);
-
-        // FIX: Strip ANSI codes before doing anything with the output
-        string cleanOutput = StripAnsiCodes(result.Output).Trim();
-
-        // Run the output checker before writing/displaying
-        LLMOutputChecker checker = new LLMOutputChecker();
-        string finalText = checker.CheckOutput(forbiddenWords, cleanOutput, fallbackText);
-
-        // Write cleaned output to disk
-        File.WriteAllText(outputPath, finalText);
-
-#if UNITY_EDITOR
-        UnityEditor.AssetDatabase.Refresh();
-#endif
-
-        isGeneratingDialogue = false;
-
-        // FIX: Notify InteractableNPC that the text is ready, passing it directly
-        OnDialogueReady?.Invoke(finalText);
-    }
-
+    /// <summary>
+    /// Returns the path to write dialogue output to. Preserved from original.
+    /// </summary>
     public string GetNpcDialoguePath()
     {
 #if UNITY_EDITOR
-        string assetPath = UnityEditor.AssetDatabase.GetAssetPath(NPCDialogue);
-        if (!string.IsNullOrEmpty(assetPath))
+        if (NPCDialogue != null)
         {
-            return Path.GetFullPath(assetPath);
+            string assetPath = UnityEditor.AssetDatabase.GetAssetPath(NPCDialogue);
+            if (!string.IsNullOrEmpty(assetPath))
+            {
+                return Path.GetFullPath(assetPath);
+            }
         }
 #endif
-        return Path.Combine(Application.persistentDataPath, "OllamaOutputs.txt");
-    }
-
-    private class ProcessResult
-    {
-        public string Output;
-        public string Error;
-        public int ExitCode;
+        return Path.Combine(Application.persistentDataPath, "LLMOutput_" + gameObject.name + ".txt");
     }
 }

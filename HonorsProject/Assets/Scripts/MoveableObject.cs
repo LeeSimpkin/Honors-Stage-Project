@@ -6,7 +6,7 @@ public class MoveableObject : MonoBehaviour
     //These fields will be exposed to Unity so the dev can set the parameters there
     [SerializeField] private float speed = 5f;
 
-
+    
 
 
     // Use this for initialization
@@ -18,7 +18,8 @@ public class MoveableObject : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(Input.GetKey(KeyCode.W))
+        if (PlayerInputSaver.MovementDisabled) return;
+        if (Input.GetKey(KeyCode.W))
         {
             transform.Translate(Vector3.up * speed * Time.deltaTime);
         }
