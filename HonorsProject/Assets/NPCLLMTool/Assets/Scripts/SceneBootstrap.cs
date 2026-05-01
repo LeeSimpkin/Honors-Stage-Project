@@ -3,14 +3,9 @@ using System.Collections;
 using Assets.Scripts;
 
 /// <summary>
-/// Scene-level initialisation. Replaces Bootstrap.cs.
-///
 /// Attach this to a GameObject in your scene alongside LLMServerManager.
 /// It reads the selected model type, resolves the .gguf filename,
 /// and starts the llama-server before any NPC can request dialogue.
-///
-/// NPCs should check LLMServerManager.Instance.IsServerReady before
-/// calling StartProcess(), or subscribe to OnServerReady below.
 /// </summary>
 public class SceneBootstrap : MonoBehaviour
 {
@@ -40,7 +35,6 @@ public class SceneBootstrap : MonoBehaviour
             yield break;
         }
 
-        // Resolve the enum to the actual .gguf filename
         string modelFile = LLMModelType.GetModelFileName(selectedModel);
         Debug.Log("[SceneBootstrap] Starting server with model: " + modelFile);
 

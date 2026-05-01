@@ -1,27 +1,17 @@
+using Assets.Scripts;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using UnityEngine;
-using Assets.Scripts;
 
 /// <summary>
 /// Connects an NPC to the local llama-server via LLMHttpClient.
 ///
-/// Replaces the original "ollama run" subprocess approach.
-/// All existing public members (OnDialogueReady, forbiddenWords, fallbackText,
-/// isGeneratingDialogue, StartProcess) are preserved so that InteractableNPC
-/// and any other subscribers require no changes.
-///
-/// Requires:
-///   - LLMServerManager running in the scene (started before this is called)
-///   - LLMHttpClient attached to the same GameObject
 /// </summary>
 public class NPCToLLM : MonoBehaviour
 {
-    // -------------------------------------------------------------------------
-    // Public fields — kept identical to the original so nothing else breaks
-    // -------------------------------------------------------------------------
 
     private TextFileManager TFM => TextFileManager.Instance;
 
@@ -37,26 +27,14 @@ public class NPCToLLM : MonoBehaviour
     [SerializeField] public List<string> forbiddenWords = new List<string>();
     [SerializeField] public string fallbackText = "I have nothing to say.";
 
-    // -------------------------------------------------------------------------
-    // New fields replacing LLMTraining and the model-selection approach
-    // -------------------------------------------------------------------------
+    private string ForbiddenWordsFilePath => Path.Combine(Application.dataPath, "NPCLLMTool", "Assets", "TextFiles", "ForbiddenWords.txt");
 
-    [Header("LLM Options")]
-    [Tooltip("The model this NPC uses. Must match a filename in StreamingAssets/LLM/ " +
-             "and the model loaded by LLMServerManager.")]
-    [SerializeField] private LLMModelType.LLMModelTypes selectedLLM;
 
     [Header("NPC Personality")]
-    [Tooltip("Describe who this NPC is. This is sent as the system prompt to the LLM " +
-             "and replaces the Ollama modelfile approach.\n\n" +
-             "Example: 'You are a grumpy blacksmith named Aldric in a medieval village. " +
-             "Keep replies to two sentences.'")]
+    [Tooltip("Describe who this NPC is. This is sent as the system prompt to the LLM")]
     [TextArea(4, 10)]
     [SerializeField] private string systemPrompt = "You are a helpful NPC in a fantasy game. Keep your replies brief.";
 
-    // -------------------------------------------------------------------------
-    // Private references — populated in Awake
-    // -------------------------------------------------------------------------
 
     private LLMHttpClient _httpClient;
 
@@ -72,13 +50,8 @@ public class NPCToLLM : MonoBehaviour
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Public API — identical signature to original StartProcess()
-    // -------------------------------------------------------------------------
-
     /// <summary>
     /// Begins generating dialogue for this NPC.
-    /// Called by InteractableNPC exactly as before — no changes required there.
     /// </summary>
     public void StartProcess()
     {
@@ -105,14 +78,6 @@ public class NPCToLLM : MonoBehaviour
         StartCoroutine(RequestDialogue());
     }
 
-    // -------------------------------------------------------------------------
-    // Private implementation
-    // -------------------------------------------------------------------------
-
-    /// <summary>
-    /// Reads the player's input, sends it to llama-server, filters the reply,
-    /// writes it to disk, and fires OnDialogueReady — same flow as the original.
-    /// </summary>
     private IEnumerator RequestDialogue()
     {
         isGeneratingDialogue = true;
@@ -144,7 +109,7 @@ public class NPCToLLM : MonoBehaviour
             }
         ));
 
-        // Wait for the callback to fire (should already be done, but safety guard)
+        // Wait for the callback
         yield return new WaitUntil(() => callbackFired);
 
         if (!string.IsNullOrEmpty(errorText))
@@ -154,9 +119,9 @@ public class NPCToLLM : MonoBehaviour
             yield break;
         }
 
-        // Run through the existing output checker — unchanged from original
-        LLMOutputChecker checker = new LLMOutputChecker();
-        string finalText = checker.CheckOutput(forbiddenWords, replyText, fallbackText);
+        // Run through the output checker
+        Filtering checker = new Filtering();
+        string finalText = checker.CheckOutput(forbiddenWords, replyText, fallbackText, ForbiddenWordsFilePath);
 
         // Write to disk — preserved from original so any file-reading code still works
         string outputPath = GetNpcDialoguePath();
@@ -170,12 +135,11 @@ public class NPCToLLM : MonoBehaviour
 
         UnityEngine.Debug.Log("[NPCToLLM] Dialogue ready: " + finalText);
 
-        // Fire the event — InteractableNPC receives this exactly as before
         OnDialogueReady?.Invoke(finalText);
     }
 
     /// <summary>
-    /// Reads the player's prompt text. Preserved from original.
+    /// Reads the player's prompt text. 
     /// </summary>
     private string GetPromptText()
     {
@@ -187,7 +151,7 @@ public class NPCToLLM : MonoBehaviour
     }
 
     /// <summary>
-    /// Returns the path to write dialogue output to. Preserved from original.
+    /// Returns the path to write dialogue output to.
     /// </summary>
     public string GetNpcDialoguePath()
     {
@@ -203,4 +167,5 @@ public class NPCToLLM : MonoBehaviour
 #endif
         return Path.Combine(Application.persistentDataPath, "LLMOutput_" + gameObject.name + ".txt");
     }
+
 }

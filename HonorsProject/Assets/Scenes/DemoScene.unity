@@ -562,7 +562,6 @@ MonoBehaviour:
   isGeneratingDialogue: 0
   forbiddenWords: []
   fallbackText: I have nothing to say.
-  selectedLLM: 1
   systemPrompt: "You are a blacksmith named Aldric. You are gruff and proud of your
     craft. \nRespond directly to your prompts in one or two short sentences. \nNever
     break character. "
@@ -578,8 +577,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cac27cc2268b935489f949e0e73865f3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  temperature: 0.7
-  maxTokens: 256
+  temperature: 0.5
+  maxTokens: 20
 --- !u!1 &625862293
 GameObject:
   m_ObjectHideFlags: 0
@@ -1816,6 +1815,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Managers
       objectReference: {fileID: 0}
+    - target: {fileID: 6406983046550452124, guid: b28376bf6eedaff409f71afed1ffba4c, type: 3}
+      propertyPath: gpuLayers
+      value: 500
+      objectReference: {fileID: 0}
     - target: {fileID: 6533733211263139597, guid: b28376bf6eedaff409f71afed1ffba4c, type: 3}
       propertyPath: m_LocalPosition.x
       value: 1.34735
@@ -1860,8 +1863,13 @@ PrefabInstance:
       propertyPath: m_Name
       value: Textfile Manager
       objectReference: {fileID: 0}
+    - target: {fileID: 9194258694917486484, guid: b28376bf6eedaff409f71afed1ffba4c, type: 3}
+      propertyPath: selectedModel
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 1835282226321659331, guid: b28376bf6eedaff409f71afed1ffba4c, type: 3}
+    - {fileID: 5609561824212964440, guid: b28376bf6eedaff409f71afed1ffba4c, type: 3}
     m_RemovedGameObjects:
     - {fileID: 5992372316360651553, guid: b28376bf6eedaff409f71afed1ffba4c, type: 3}
     m_AddedGameObjects: []

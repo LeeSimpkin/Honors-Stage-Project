@@ -7,34 +7,21 @@ using System.Text;
 /// <summary>
 /// Sends chat completion requests to the local llama-server instance
 /// and returns the model's reply.
-///
-/// llama-server exposes an OpenAI-compatible REST API, so requests follow the
-/// standard chat completion format:
-///   POST /v1/chat/completions
-///   { "messages": [ {"role": "system", "content": "..."}, {"role": "user", "content": "..."} ] }
-///
-/// This replaces the "ollama run" subprocess call in the original NPCToLLM.cs.
-/// Attach this component to the same GameObject as NPCToLLM.
 /// </summary>
 public class LLMHttpClient : MonoBehaviour
 {
     [Header("Generation Settings")]
     [Tooltip("Controls randomness of replies. Lower = more predictable. Range: 0.0 - 1.0")]
-    [SerializeField] private float temperature = 0.7f;
+    [SerializeField] private float temperature = 1.0f;
 
     [Tooltip("Maximum number of tokens (roughly words) the model will generate in one reply.")]
-    [SerializeField] private int maxTokens = 256;
+    [SerializeField] private int maxTokens = 20;
 
-    // -----------------------------------------------------------------
-    // JSON serialisation classes
-    // These must be [Serializable] for Unity's JsonUtility to handle them.
-    // They mirror the shape of the llama-server API request and response.
-    // -----------------------------------------------------------------
 
     [Serializable]
     private class ChatMessage
     {
-        public string role;     // "system", "user", or "assistant"
+        public string role;
         public string content;
     }
 
@@ -44,7 +31,7 @@ public class LLMHttpClient : MonoBehaviour
         public ChatMessage[] messages;
         public float temperature;
         public int max_tokens;
-        public bool stream;     // false = wait for the full reply before returning
+        public bool stream; 
     }
 
     // The response from llama-server wraps the reply inside choices[0].message.content
