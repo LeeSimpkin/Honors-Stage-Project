@@ -3,14 +3,7 @@ using System.Collections;
 using Assets.Scripts;
 
 /// <summary>
-/// Scene-level initialisation. Replaces Bootstrap.cs.
-///
-/// Attach this to a GameObject in your scene alongside LLMServerManager.
-/// It reads the selected model type, resolves the .gguf filename,
-/// and starts the llama-server before any NPC can request dialogue.
-///
-/// NPCs should check LLMServerManager.Instance.IsServerReady before
-/// calling StartProcess(), or subscribe to OnServerReady below.
+/// Scene-level initialisation. 
 /// </summary>
 public class SceneBootstrap : MonoBehaviour
 {
@@ -19,10 +12,6 @@ public class SceneBootstrap : MonoBehaviour
              "The matching .gguf file must exist in Assets/StreamingAssets/LLM/")]
     [SerializeField] private LLMModelType.LLMModelTypes selectedModel = LLMModelType.LLMModelTypes.TinyLlama;
 
-    /// <summary>
-    /// Fired once the server is ready. NPCs or UI can subscribe to this
-    /// instead of polling IsServerReady themselves.
-    /// </summary>
     public static event System.Action OnServerReady;
 
     private void Start()
@@ -40,11 +29,9 @@ public class SceneBootstrap : MonoBehaviour
             yield break;
         }
 
-        // Resolve the enum to the actual .gguf filename
         string modelFile = LLMModelType.GetModelFileName(selectedModel);
         Debug.Log("[SceneBootstrap] Starting server with model: " + modelFile);
 
-        // Start the server and wait for it to be ready
         yield return StartCoroutine(LLMServerManager.Instance.StartServer(modelFile));
 
         if (!LLMServerManager.Instance.IsServerReady)

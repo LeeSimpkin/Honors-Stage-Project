@@ -34,12 +34,10 @@ public class InteractableNPC : MonoBehaviour
 
     void OnDestroy()
     {
-        // Always unsubscribe to avoid memory leaks / dangling references
         if (npcTollm != null)
             npcTollm.OnDialogueReady -= HandleDialogueReady;
     }
 
-    // Called by NPCToLLM once Ollama has finished and output is clean
     private void HandleDialogueReady(string dialogue)
     {
         dialogueText.SetText(dialogue);
@@ -51,7 +49,6 @@ public class InteractableNPC : MonoBehaviour
 
         if (isInRange && !PlayerInputSaver.MovementDisabled)
         {
-            // Show "generating..." while waiting, so the player knows something is happening
             if (npcTollm.isGeneratingDialogue)
             {
                 interactionPrompt.SetText("Generating response...");
@@ -63,7 +60,7 @@ public class InteractableNPC : MonoBehaviour
                 if (Input.GetKeyDown(KeyCode.E))
                 {
                     Debug.Log("Interacted with NPC");
-                    dialogueText.SetText("..."); // placeholder while generating
+                    dialogueText.SetText("...");
                     npcTollm.StartProcess();
                 }
             }
@@ -75,7 +72,6 @@ public class InteractableNPC : MonoBehaviour
             interactionPrompt.SetText("");
             dialogueText.SetText("");
 
-            // FIX: Only clear the output file when NOT generating, to avoid wiping live output
             if (wasInRange && !npcTollm.isGeneratingDialogue)
             {
                 File.WriteAllText(npcTollm.GetNpcDialoguePath(), string.Empty);

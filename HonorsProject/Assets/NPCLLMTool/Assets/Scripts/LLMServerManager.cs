@@ -7,15 +7,6 @@ using System.Text;
 
 /// <summary>
 /// Manages the lifecycle of the llama-server.exe process.
-///
-/// Setup:
-///   Place llama-server.exe and your .gguf model files inside:
-///   Assets/NPCLLMTool/Build/llama/
-///
-///   llama-server.exe can be downloaded from:
-///   https://github.com/ggerganov/llama.cpp/releases
-///
-/// One instance of this should exist in your scene, shared across all NPCs.
 /// </summary>
 public class LLMServerManager : MonoBehaviour
 {
@@ -39,8 +30,6 @@ public class LLMServerManager : MonoBehaviour
 
     private Process _serverProcess;
 
-    // Accumulates server output lines so they can be logged to Unity's console
-    // from the main thread (Unity's Debug.Log is not thread-safe)
     private readonly StringBuilder _pendingLogs = new StringBuilder();
     private readonly object _logLock = new object();
 
@@ -62,7 +51,6 @@ public class LLMServerManager : MonoBehaviour
         string serverExePath = Path.Combine(llmFolder, "llama-server.exe");
         string modelPath = Path.Combine(llmFolder, modelFileName);
 
-        // Log exact paths so you can confirm they are correct in the Unity console
         UnityEngine.Debug.Log("[LLMServerManager] LLM folder:  " + llmFolder);
         UnityEngine.Debug.Log("[LLMServerManager] Server path: " + serverExePath);
         UnityEngine.Debug.Log("[LLMServerManager] Model path:  " + modelPath);
@@ -114,9 +102,6 @@ public class LLMServerManager : MonoBehaviour
             yield break;
         }
 
-        // Read stdout and stderr asynchronously.
-        // llama-server writes startup progress to stderr — this is normal for llama.cpp.
-        // Without reading these the OS pipe buffer fills and the server hangs silently.
         _serverProcess.OutputDataReceived += (sender, e) =>
         {
             if (!string.IsNullOrEmpty(e.Data))
@@ -139,10 +124,8 @@ public class LLMServerManager : MonoBehaviour
 
         while (elapsed < startupTimeoutSeconds && !ready)
         {
-            // Flush any log lines the server has written so far
             FlushPendingLogs();
 
-            // If the process has already exited it crashed — stop waiting immediately
             if (_serverProcess.HasExited)
             {
                 FlushPendingLogs();
@@ -191,7 +174,6 @@ public class LLMServerManager : MonoBehaviour
         UnityEngine.Debug.Log("[LLMServerManager] Server is ready at " + ServerUrl);
     }
 
-    // Flush each Update frame so log lines appear in the console promptly during loading
     private void Update()
     {
         if (_serverProcess != null && !IsServerReady)
@@ -200,7 +182,6 @@ public class LLMServerManager : MonoBehaviour
 
     /// <summary>
     /// Moves any log lines buffered on background threads into Unity's console.
-    /// Must be called from the main thread.
     /// </summary>
     private void FlushPendingLogs()
     {
@@ -227,7 +208,6 @@ public class LLMServerManager : MonoBehaviour
         }
         catch
         {
-            // Server not up yet — expected during startup
             return false;
         }
     }
