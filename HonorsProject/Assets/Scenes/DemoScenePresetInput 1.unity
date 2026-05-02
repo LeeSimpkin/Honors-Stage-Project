@@ -119,54 +119,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &257609994
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 257609996}
-  - component: {fileID: 257609995}
-  m_Layer: 0
-  m_Name: InputManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &257609995
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 257609994}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: acc03853f5290364ca4a4f06b8ce162c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  inputField: {fileID: 0}
-  statusText: {fileID: 1058607009}
-  fileName: {fileID: 4900000, guid: faa66c632d8ae044aa6b7ea031d1e0bf, type: 3}
-  appendToFile: 0
---- !u!4 &257609996
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 257609994}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 462.86047, y: 398.59424, z: -5.587344}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &344455349
 GameObject:
   m_ObjectHideFlags: 0
@@ -337,7 +289,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerPosition: {fileID: 794543999}
-  NPCPosition: {fileID: 450900657}
   interactionPrompt: {fileID: 1058607009}
   dialogueText: {fileID: 625862295}
   npcDialogueAsset: {fileID: 4900000, guid: 97c0a3dfae9063a4d805122967f2aea8, type: 3}
@@ -406,7 +357,7 @@ Transform:
   m_GameObject: {fileID: 450900654}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4.68, y: 1.96, z: 0}
+  m_LocalPosition: {x: 2.74, y: 2.07, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -430,9 +381,8 @@ MonoBehaviour:
   isGeneratingDialogue: 0
   forbiddenWords: []
   fallbackText: I have nothing to say.
-  selectedLLM: 1
-  systemPrompt: "You are a Merchant named William. You sell cabbages from a cart
-    and, which has just been destroyed by the hero.\nRespond directly to your prompts
+  systemPrompt: "You are a Merchant named William. You sell cabbages from a cart,
+    which has just been destroyed by the hero.\nRespond directly to your prompts
     in one or two short sentences. \nNever break character. "
 --- !u!114 &450900659
 MonoBehaviour:
@@ -447,7 +397,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   temperature: 0.7
-  maxTokens: 30
+  maxTokens: 600
 --- !u!1 &625862293
 GameObject:
   m_ObjectHideFlags: 0
@@ -1249,19 +1199,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3961913246401555781, guid: 21194e9513ab23c48849787ce8ed1217, type: 3}
       propertyPath: m_LocalScale.x
-      value: 4.6137195
+      value: 4.7784643
       objectReference: {fileID: 0}
     - target: {fileID: 3961913246401555781, guid: 21194e9513ab23c48849787ce8ed1217, type: 3}
       propertyPath: m_LocalScale.y
-      value: 3.7199113
+      value: 3.8478763
       objectReference: {fileID: 0}
     - target: {fileID: 3961913246401555781, guid: 21194e9513ab23c48849787ce8ed1217, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.01
+      value: -0.0593
       objectReference: {fileID: 0}
     - target: {fileID: 3961913246401555781, guid: 21194e9513ab23c48849787ce8ed1217, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.14
+      value: 0.0328
       objectReference: {fileID: 0}
     - target: {fileID: 3961913246401555781, guid: 21194e9513ab23c48849787ce8ed1217, type: 3}
       propertyPath: m_LocalPosition.z
@@ -1314,9 +1264,9 @@ GameObject:
   m_Component:
   - component: {fileID: 2020769162}
   - component: {fileID: 2020769161}
-  - component: {fileID: 2020769160}
   - component: {fileID: 2020769159}
   - component: {fileID: 2020769158}
+  - component: {fileID: 2020769163}
   m_Layer: 1
   m_Name: ThiefNPC
   m_TagString: Untagged
@@ -1355,28 +1305,9 @@ MonoBehaviour:
   isGeneratingDialogue: 0
   forbiddenWords: []
   fallbackText: I have nothing to say.
-  selectedLLM: 1
   systemPrompt: "You are a Thief named Henry. You steal gold from the wealthy and
     sell it back to them. You are proud of your thieving.\nRespond directly to your
-    prompts in one or two short sentences. \nNever break character. "
---- !u!114 &2020769160
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2020769157}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d530e8509c478944494a5ee61b93dedb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  playerPosition: {fileID: 794543999}
-  NPCPosition: {fileID: 2020769162}
-  interactionPrompt: {fileID: 1058607009}
-  dialogueText: {fileID: 830459233}
-  npcDialogueAsset: {fileID: 4900000, guid: 97c0a3dfae9063a4d805122967f2aea8, type: 3}
-  playerInputAsset: {fileID: 4900000, guid: faa66c632d8ae044aa6b7ea031d1e0bf, type: 3}
+    prompts in one or two short sentences. \nNever break character. \nYou speak French."
 --- !u!212 &2020769161
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -1441,13 +1372,30 @@ Transform:
   m_GameObject: {fileID: 2020769157}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -5.39, y: 2.03, z: 0}
+  m_LocalPosition: {x: -3.58, y: 1.99, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1026944455}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2020769163
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2020769157}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d530e8509c478944494a5ee61b93dedb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerPosition: {fileID: 794543999}
+  interactionPrompt: {fileID: 1058607009}
+  dialogueText: {fileID: 830459233}
+  npcDialogueAsset: {fileID: 4900000, guid: 97c0a3dfae9063a4d805122967f2aea8, type: 3}
+  playerInputAsset: {fileID: 4900000, guid: faa66c632d8ae044aa6b7ea031d1e0bf, type: 3}
 --- !u!1 &2068437236
 GameObject:
   m_ObjectHideFlags: 0
@@ -1704,7 +1652,7 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents:
-    - {fileID: 1835282226321659331, guid: b28376bf6eedaff409f71afed1ffba4c, type: 3}
+    - {fileID: 0}
     m_RemovedGameObjects:
     - {fileID: 5992372316360651553, guid: b28376bf6eedaff409f71afed1ffba4c, type: 3}
     m_AddedGameObjects: []
@@ -1720,6 +1668,5 @@ SceneRoots:
   - {fileID: 2020769162}
   - {fileID: 450900657}
   - {fileID: 2068437240}
-  - {fileID: 257609996}
   - {fileID: 1340950071}
   - {fileID: 7035237894615875972}

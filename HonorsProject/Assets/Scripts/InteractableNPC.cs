@@ -4,7 +4,6 @@ using UnityEngine;
 public class InteractableNPC : MonoBehaviour
 {
     public Transform playerPosition;
-    public Transform NPCPosition;
     public TMPro.TextMeshProUGUI interactionPrompt;
     public TMPro.TextMeshProUGUI dialogueText;
 
@@ -45,7 +44,7 @@ public class InteractableNPC : MonoBehaviour
 
     void Update()
     {
-        bool isInRange = Vector3.Distance(playerPosition.position, NPCPosition.position) < 2f;
+        bool isInRange = Vector3.Distance(playerPosition.position, transform.position) < 2f;
 
         if (isInRange && !PlayerInputSaver.MovementDisabled)
         {

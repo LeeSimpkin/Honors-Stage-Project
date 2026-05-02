@@ -15,7 +15,7 @@ public class LLMHttpClient : MonoBehaviour
     [SerializeField] private float temperature = 0.7f;
 
     [Tooltip("Maximum number of tokens (roughly words) the model will generate in one reply.")]
-    [SerializeField] private int maxTokens = 256;
+    [SerializeField] private int maxTokens = 30;
 
 
     [Serializable]
