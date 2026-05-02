@@ -17,7 +17,7 @@ public class LLMServerManager : MonoBehaviour
     [SerializeField] private int port = 8080;
 
     [Tooltip("Number of model layers to offload to GPU. 0 = CPU only. 999 = offload as many as possible.")]
-    [SerializeField] private int gpuLayers = 0;
+    [SerializeField] private int gpuLayers = 500;
 
     [Tooltip("Context window size in tokens. Higher = more memory. 2048 is a safe default.")]
     [SerializeField] private int contextSize = 2048;

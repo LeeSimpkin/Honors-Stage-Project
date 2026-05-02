@@ -19,7 +19,11 @@ public class TextFileManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
-
+    /// <summary>
+    /// Loads in text from a TextAsset
+    /// </summary>
+    /// <param name="filePath"></param>
+    /// <returns></returns>
     public string LoadText(TextAsset filePath)
     {
         if (filePath != null)
