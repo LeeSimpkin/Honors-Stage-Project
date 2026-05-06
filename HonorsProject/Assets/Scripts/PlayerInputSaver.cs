@@ -56,7 +56,7 @@ public class PlayerInputSaver : MonoBehaviour
                 File.AppendAllText(FilePath, playerText + System.Environment.NewLine);
             else
                 File.WriteAllText(FilePath, playerText);
-
+            UnityEditor.AssetDatabase.Refresh();
             ShowStatus($"Saved to: {FilePath}", Color.green);
             inputField.text = "";
         }
