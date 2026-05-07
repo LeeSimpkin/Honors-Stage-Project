@@ -47,16 +47,7 @@ public class LLMHttpClient : MonoBehaviour
         public ChatChoice[] choices;
     }
 
-    /// <summary>
-    /// Sends a system prompt and user message to llama-server.
-    /// Results are returned via callbacks to keep this non-blocking.
-    ///
-    /// serverUrl   - the base URL of the server, e.g. "http://127.0.0.1:8080"
-    /// systemPrompt - the NPC's personality/role instructions
-    /// userMessage  - the player's input text
-    /// onSuccess    - called with the model's reply string on success
-    /// onError      - called with an error description string on failure
-    /// </summary>
+  
     public IEnumerator SendChatRequest(
         string serverUrl,
         string systemPrompt,

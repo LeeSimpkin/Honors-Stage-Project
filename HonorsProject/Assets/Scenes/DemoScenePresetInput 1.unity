@@ -379,8 +379,14 @@ MonoBehaviour:
   playerInput: {fileID: 4900000, guid: faa66c632d8ae044aa6b7ea031d1e0bf, type: 3}
   NPCDialogue: {fileID: 4900000, guid: 97c0a3dfae9063a4d805122967f2aea8, type: 3}
   isGeneratingDialogue: 0
-  forbiddenWords: []
+  forbiddenWords:
+  - I
+  - I'm
+  - Me
+  - you
   fallbackText: I have nothing to say.
+  temperature: 0.7
+  maxTokens: 30
   systemPrompt: "You are a Merchant named William. You sell cabbages from a cart,
     which has just been destroyed by the hero.\nRespond directly to your prompts
     in one or two short sentences. \nNever break character. "
@@ -1441,6 +1447,8 @@ MonoBehaviour:
   isGeneratingDialogue: 0
   forbiddenWords: []
   fallbackText: I have nothing to say.
+  temperature: 0.7
+  maxTokens: 30
   systemPrompt: "You are a Thief named Henry. You steal gold from the wealthy and
     sell it back to them. You are proud of your thieving.\nRespond directly to your
     prompts in one or two short sentences. \nNever break character. "

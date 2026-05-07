@@ -3,6 +3,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -18,7 +21,7 @@ public class NPCToLLM : MonoBehaviour
     public TextAsset playerInput;
     public TextAsset NPCDialogue;    // Still used to determine the output file path
     public bool isGeneratingDialogue = false;
-
+    private CancellationTokenSource _cts;
     /// <summary>
     /// Fired when dialogue is ready. InteractableNPC subscribes to this — no changes needed there.
     /// </summary>
@@ -30,11 +33,16 @@ public class NPCToLLM : MonoBehaviour
     private string ForbiddenWordsFilePath => Path.Combine(Application.dataPath, "NPCLLMTool", "Assets", "TextFiles", "ForbiddenWords.txt");
 
 
+    [Header("Generation Settings")]
+    [SerializeField] private float temperature = 0.7f;
+    [SerializeField] private int maxTokens = 30;
+
     [Header("NPC Personality")]
     [Tooltip("Describe who this NPC is. This is sent as the system prompt to the LLM")]
     [TextArea(4, 10)]
     [SerializeField] private string systemPrompt = "You are a helpful NPC in a fantasy game. Keep your replies brief.";
 
+    readonly System.Diagnostics.Stopwatch _responseTimer = new System.Diagnostics.Stopwatch();
 
     private LLMHttpClient _httpClient;
 
@@ -55,6 +63,9 @@ public class NPCToLLM : MonoBehaviour
     /// </summary>
     public void StartProcess()
     {
+        _responseTimer.Restart();
+        _responseTimer.Start();
+
         if (isGeneratingDialogue)
         {
             UnityEngine.Debug.LogWarning("[NPCToLLM] Already generating dialogue. Request ignored.");
@@ -87,43 +98,32 @@ public class NPCToLLM : MonoBehaviour
 
         UnityEngine.Debug.Log("[NPCToLLM] Requesting dialogue. Prompt: " + prompt);
 
-        // Result holders — populated by the callbacks below
-        string replyText = null;
-        string errorText = null;
-        bool callbackFired = false;
+        _cts = new CancellationTokenSource();
 
-        // Delegate the HTTP call to LLMHttpClient (keeps HTTP logic out of this class)
-        yield return StartCoroutine(_httpClient.SendChatRequest(
-            serverUrl,
-            systemPrompt,
-            prompt,
-            onSuccess: reply =>
-            {
-                replyText = reply;
-                callbackFired = true;
-            },
-            onError: error =>
-            {
-                errorText = error;
-                callbackFired = true;
-            }
-        ));
+        Task<string> llmTask = SendRequestAsync(serverUrl, systemPrompt, prompt, _cts.Token);
 
-        // Wait for the callback
-        yield return new WaitUntil(() => callbackFired);
+        yield return new WaitUntil(() => llmTask.IsCompleted);
 
-        if (!string.IsNullOrEmpty(errorText))
+        if (llmTask.IsFaulted)
         {
-            UnityEngine.Debug.LogError("[NPCToLLM] Failed to get reply: " + errorText);
+            UnityEngine.Debug.LogError("[NPCToLLM] LLM request failed: " +
+                llmTask.Exception?.GetBaseException().Message);
             isGeneratingDialogue = false;
             yield break;
         }
 
-        // Run through the output checker
+        if (llmTask.IsCanceled)
+        {
+            UnityEngine.Debug.Log("[NPCToLLM] LLM request was cancelled.");
+            isGeneratingDialogue = false;
+            yield break;
+        }
+
+        string replyText = llmTask.Result;
+
         Filtering checker = new Filtering();
         string finalText = checker.CheckOutput(forbiddenWords, replyText, fallbackText, ForbiddenWordsFilePath);
 
-        // Write to disk — preserved from original so any file-reading code still works
         string outputPath = GetNpcDialoguePath();
         File.WriteAllText(outputPath, finalText);
 
@@ -132,6 +132,8 @@ public class NPCToLLM : MonoBehaviour
 #endif
 
         isGeneratingDialogue = false;
+        _responseTimer.Stop();
+        UnityEngine.Debug.Log("[NPCToLLM] Response time: " + _responseTimer.Elapsed.TotalSeconds.ToString("F2") + " seconds");
 
         UnityEngine.Debug.Log("[NPCToLLM] Dialogue ready: " + finalText);
 
@@ -149,7 +151,41 @@ public class NPCToLLM : MonoBehaviour
         }
         return "hello";
     }
+    private async Task<string> SendRequestAsync(
+      string serverUrl,
+      string sysPrompt,
+      string userMessage,
+      CancellationToken ct)
+    {
+        string endpoint = serverUrl + "/v1/chat/completions";
+        string json = BuildRequestJson(sysPrompt, userMessage);
+        byte[] bodyBytes = Encoding.UTF8.GetBytes(json);
 
+        using (var httpClient = new HttpClient())
+        {
+            httpClient.Timeout = TimeSpan.FromSeconds(60);
+
+            using (var content = new ByteArrayContent(bodyBytes))
+            {
+                content.Headers.ContentType =
+                    new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+
+                HttpResponseMessage response =
+                    await httpClient.PostAsync(endpoint, content, ct);
+
+                response.EnsureSuccessStatusCode();
+
+                string responseJson = await response.Content.ReadAsStringAsync();
+
+                ChatResponse parsed = JsonUtility.FromJson<ChatResponse>(responseJson);
+
+                if (parsed == null || parsed.choices == null || parsed.choices.Length == 0)
+                    throw new Exception("Response was empty or could not be parsed.");
+
+                return parsed.choices[0].message.content.Trim();
+            }
+        }
+    }
     /// <summary>
     /// Returns the path to write dialogue output to.
     /// </summary>
@@ -168,4 +204,24 @@ public class NPCToLLM : MonoBehaviour
         return Path.Combine(Application.persistentDataPath, "LLMOutput_" + gameObject.name + ".txt");
     }
 
+    private string BuildRequestJson(string sysPrompt, string userMessage)
+    {
+        var request = new ChatRequest
+        {
+            messages = new[]
+            {
+                new ChatMessage { role = "system", content = sysPrompt },
+                new ChatMessage { role = "user",   content = userMessage }
+            },
+            temperature = this.temperature,
+            max_tokens = this.maxTokens,
+            stream = false
+        };
+        return JsonUtility.ToJson(request);
+    }
+
+    [Serializable] private class ChatMessage { public string role; public string content; }
+    [Serializable] private class ChatRequest { public ChatMessage[] messages; public float temperature; public int max_tokens; public bool stream; }
+    [Serializable] private class ChatChoice { public ChatMessage message; }
+    [Serializable] private class ChatResponse { public ChatChoice[] choices; }
 }
